@@ -1,0 +1,77 @@
+HomeController.cs : 
+
+public IActionResult Price()
+{
+    return View();
+}
+
+//-------------
+Views/Home/Price.cshtml : 
+
+@{
+    ViewData["Title"] = "Price";
+}
+<h2>Razor Example</h2>
+
+@{
+    var price = 70;
+    if (price > 30)
+    {
+        <p class="text-success">The price is greater than 30</p>
+    }
+    else
+    {
+        <p class="text-danger">The price is lower than 30</p>
+    }
+}
+
+//----------
+Index.cshtml
+
+<p><a href="/Home/Price">Go to Price Page</a></p>
+
+
+Month razor view 
+
+@{
+    ViewData["Title"] = "Switch";
+}
+
+<h1>Switch</h1>
+
+@{ 
+
+    var month = DateTime.Now.ToString("MMMM");
+    var msg = "";
+
+    switch (month) {
+        case "January":
+            msg += "Starting of the year";
+            break;
+        case "June":
+            msg += "June here";
+            break;
+        case "July":
+            msg += "July here";
+            break;
+    }
+
+    <p class="text-danger">@msg</p>
+
+}
+
+Mult razor 
+
+@model razordemo.Views.Home.TableModel
+@{      
+        int number = 7;
+    }
+
+    <h2>Multiplication of table of @number</h2>
+    <ul>
+        @for (int i = 1; i <= 10; i++)
+        {
+            <li>@($"{number} * {i} = {number * i}")</li>
+        }
+    </ul>
+
