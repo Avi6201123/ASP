@@ -1,0 +1,102 @@
+ContactModel.cs : 
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+
+namespace Form1.Models
+{
+    public class ContactModel
+    {
+        [Required(ErrorMessage = "Name is required")]
+        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Name Cannot contain numbers or special characters.")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Enter a valid email")]
+        [RegularExpression(@".+\..+", ErrorMessage = "Email must contain '.' after '@'")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Message is required")]
+        [StringLength(500, ErrorMessage = "Message cannot exceed 500 characters.")]
+        public string Message { get; set; }
+    }
+}
+
+ContactController.cs : 
+
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Form1.Models;
+
+namespace Form1.Controllers
+{
+    public class ContactController : Controller
+    {
+        public IActionResult Index()
+        {
+            return View();
+        }
+        [HttpPost]
+        public IActionResult Index(ContactModel form)
+        {
+            if (ModelState.IsValid)
+            {
+                return RedirectToAction("ThankYou");
+            }
+            return View(form);
+        }
+        public IActionResult ThankYou()
+        {
+            return View();
+        }
+    }
+}
+
+Views/Contact/Index.cshtml : 
+
+@model Form1.Models.ContactModel
+
+<h2>Contact Form</h2>
+
+<form asp-action="Index" method="post">
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Message"></label>
+        <textarea asp-for="Message" class="form-control"></textarea>
+        <span asp-validation-for="Message" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
+
+
+Views/Contact/ThankYou : 
+
+@model Form1.Models.ContactModel
+@{
+    ViewData["Title"] = "Thank You";
+}
+<h2>Thank You</h2>
+<p>Your message has been received successfully.</p>
+<a href="@Url.Action("Index", "Contact")">Back to Contact Form</a>
