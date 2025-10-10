@@ -1,0 +1,103 @@
+ProductController.cs
+
+using Microsoft.AspNetCore.Mvc;
+using ProductManagement1.Models;
+using System.Collections.Generic;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace ProductManagement1.Controllers
+{
+    public class ProductController : Controller
+    {
+        public IActionResult Index()
+        {
+            var products = new List<Product>
+            {
+                new Product {Id = 1, Name = "Laptop", Price = 1500, ImagePath = "C:/Users/avant/OneDrive/Pictures/Screenshots/Screenshot 2025-10-11 013143.png"},
+                new Product {Id = 2, Name = "Mouse", Price = 25, ImagePath = "C:/Users/avant/OneDrive/Pictures/Screenshots/Screenshot 2025-10-11 013426.png"}
+            };
+            return View(products);
+        }
+    }
+}
+
+---------------------------------
+Views/Product/Index.cshtml
+
+@model IEnumerable<ProductManagement1.Models.Product>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Image</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@product.Price</td>
+                <td>
+                    <img src="@product.ImagePath" alt="@product.Name" width="150" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+-------------------------
+Product.cs 
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+namespace ProductManagement1.Models
+{
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public string ImagePath {  get; set; }
+    }
+}
+
+----------------
+Program.cs
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapStaticAssets();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
+
+
+app.Run();
