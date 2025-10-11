@@ -19,7 +19,7 @@ appset.json
 }
 
 
-
+No need only if necessary then change
 Startup.cs : 
 
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env) { 
@@ -152,30 +152,6 @@ namespace MvcExceptionLoggingDemo.Filters
 }
 
 
-
-
-HomeController.cs
-
-public class HomeController : Controller
-{
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> logger)
-    {
-        _logger = logger;
-    }
-
-    public IActionResult Index()
-    {
-        _logger.LogInformation("Index page visited at {time}", DateTime.Now);
-        return View();
-    }
-
-    public IActionResult Boom()
-    {
-        throw new Exception("Test exception");
-    }
-}
 
 
 /Home/Divide?a=10&b=2
