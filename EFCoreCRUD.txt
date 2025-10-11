@@ -1,0 +1,95 @@
+In tools->NuGet Package Manager->Package Manager Console
+
+Install-Package Microsoft.EntityFrameworkCore -Version 3.0.0
+Install-Package Microsoft.EntityFrameworkCore.SqlServer -Version 3.0.0
+Install-Package Microsoft.EntityFrameworkCore.Tools -Version 3.0.0
+Install-Package Microsoft.EntityFrameworkCore.Design -Version 3.0.0
+
+In Models folder-> add new class-> Student.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace EFCoreDemo.Models
+{
+    public class Student
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+    }
+}
+
+
+Create a new folder by right clicking on the project name->name it Data->add new class-> AppDbContext.cs
+
+
+using Crud1.Models;
+using EFCoreDemo.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace EFCoreDemo.Data
+{
+    public class AppDbContext : DbContext
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options) :
+            base(options)
+        { }
+        public DbSet<Student> Students { get; set; }
+
+    }
+}
+
+
+Open appsettings.json
+
+
+{
+    "ConnectionStrings": {
+      "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=EFCoreDemoDB;Trusted_Connection=True;MultipleActiveResultSets=true"
+    },
+
+
+    "Logging": {
+      "LogLevel": {
+        "Default": "Information",
+        "Microsoft.AspNetCore": "Warning"
+      }
+    },
+    "AllowedHosts": "*"
+  }
+
+
+Register DbContext in Startup.cs
+Startup.cs->in ConfigureServices method add
+
+using Microsoft.EntityFrameworkCore;
+using databasedemo.Data;
+public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddControllersWithViews();
+        }
+
+Package Manager Console : 
+Add-Migration InitialCreate
+Update-Database
+
+Open SQL Server Object Explorer in Visual Studio ->
+expand (localdb)\MSSQLLocalDB ->check for database EFCoreDemoDB->
+verify Students table exists.
+
+
+In Controllers Folder -> add new scaffolded Item
+Choose MVC Controller with Views using Entity Framework
+Model class -> Student (EFCoreDemo.Models)
+Data context class  -> AppDbContext (EFCoreDemo.Data)
+Name it StudentsController.
+Click Add.
+
