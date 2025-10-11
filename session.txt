@@ -1,0 +1,223 @@
+HomeController : 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Session1.Models;
+using Microsoft.AspNetCore.Http;
+
+namespace Session1.Controllers
+{
+    public class HomeController : Controller
+    {
+        public IActionResult SetSessionData()
+        {
+            HttpContext.Session.SetString("UserName", "ABC");
+            HttpContext.Session.SetInt32("UserAge", 30);
+            return View();
+        }
+
+        public IActionResult GetSessionData()
+        {
+            var userName = HttpContext.Session.GetString("UserName");
+            var userAge = HttpContext.Session.GetInt32("UserAge");
+
+            if (!string.IsNullOrEmpty(userName) && userAge.HasValue)
+            {
+                ViewData["Message"] = $"User: {userName}, Age: {userAge.Value}";
+            }
+            else
+            {
+                ViewData["Message"] = "No session data found.";
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult ClearSingleSession()
+        {
+            HttpContext.Session.Remove("UserName");
+            return RedirectToAction("GetSessionData");
+        }
+
+        [HttpPost]
+        public IActionResult ClearAllSessionData()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("GetSessionData");
+        }
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+    }
+
+}
+
+Startup.cs : 
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
+
+namespace Session1
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddDistributedMemoryCache(); 
+
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30); 
+                options.Cookie.HttpOnly = true;                 
+                options.Cookie.IsEssential = true;             
+            });
+
+            services.AddControllersWithViews();
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.AccessDeniedPath = "/Account/AccessDenied";
+                });
+        }
+
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseSession();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+            });
+        }
+    }
+}
+
+
+Program.cs : 
+using Microsoft.AspNetCore.Authentication.Cookies;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// ----------------------
+// Add services
+// ----------------------
+
+// Add distributed memory cache (required for session)
+builder.Services.AddDistributedMemoryCache();
+
+// Add session with options
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Session timeout
+    options.Cookie.HttpOnly = true;                 // Prevent client-side access
+    options.Cookie.IsEssential = true;             // Always sent
+});
+
+// Add MVC support
+builder.Services.AddControllersWithViews();
+
+// Add Cookie Authentication
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+    });
+
+var app = builder.Build();
+
+// ----------------------
+// Configure Middleware
+// ----------------------
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+// Enable session middleware
+app.UseSession();
+
+// Enable authentication & authorization
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Map controller routes
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();
+
+
+GetSessionData.cshtml : 
+<h2>@ViewData["Message"]</h2>
+
+<br>
+<form method="post" action="@Url.Action("ClearSingleSession", "Home")">
+    <button type="submit">Clear User Name Session</button>
+</form>
+
+<br>
+<form method="post" action="@Url.Action("ClearAllSessionData", "Home")">
+    <button type="submit">Clear All Session Data</button>
+</form>
+
+
+SetSessionData : 
+@{
+    ViewData["Title"] = "Session Data Set";
+}
+<h2>@ViewData["Title"]</h2>
+<p>Session data has been set successfully!</p>
+<a href="@Url.Action("GetSessionData")">View Session Data</a>
+
+
+
+
