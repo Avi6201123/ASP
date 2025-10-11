@@ -1,0 +1,98 @@
+Partial Way(Easy)
+Person.cs : 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace PartialView.Models
+{
+    public class Person
+    {
+        public string Name { get; set; }
+        public int Age { get; set; }
+    }
+}
+
+Home.cs : 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace PartialView.Models
+{
+    public class Home
+    {
+        public Person Person { get; set; }
+    }
+}
+
+
+HomeController.cs : 
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using PartialView.Models;
+using PartialView.Models;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Practical_7.Controllers
+{
+    public class HomeController : Controller
+    {
+        private readonly ILogger<HomeController> _logger;
+
+        public HomeController(ILogger<HomeController> logger)
+        {
+            _logger = logger;
+        }
+
+        public IActionResult Index()
+        {
+            var people = new List<Person>
+        {
+            new Person { Name = "ABC", Age = 25 },
+            new Person { Name = "PQR", Age = 30 },
+            new Person { Name = "XYZ", Age = 22 }
+        };
+
+            return View(people);
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+    }
+}
+
+_Partial.cshtml : 
+@model PartialView.Models.Person
+
+<div>
+    <strong>Name:</strong> @Model.Name<br />
+    <strong>Age:</strong> @Model.Age
+</div>
+
+
+Home/Index.html:
+@*@model PartialView.Models.Person*@ 
+@model List<PartialView.Models.Person> // For a list
+
+
+<h2>People List</h2>
+
+@foreach (var person in Model)
+{
+    @await Html.PartialAsync("_Partial", person)
+}
+
