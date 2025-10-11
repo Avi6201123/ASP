@@ -54,6 +54,18 @@ namespace Session1.Controllers
         {
             return View();
         }
+        public IActionResult SetTempData()
+        {
+            TempData["Message"] = "Hello from SetTempData!";
+            return RedirectToAction("GetTempData");
+        }
+
+        public IActionResult GetTempData()
+        {
+            string message = TempData["Message"] as string;
+            ViewBag.Message = message;
+            return View();
+        }
 
     }
 
@@ -219,5 +231,16 @@ SetSessionData :
 <a href="@Url.Action("GetSessionData")">View Session Data</a>
 
 
+GetTempData.cshtml : 
+<h2>Message</h2>
+
+@if (!string.IsNullOrEmpty(ViewBag.Message))
+{
+    <p>@ViewBag.Message</p>
+}
+else
+{
+    <p>No message found.</p>
+}
 
 
